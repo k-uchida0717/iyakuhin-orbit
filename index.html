@@ -76,6 +76,33 @@ body.theme-ocean .core{background:radial-gradient(circle,rgba(95,227,255,.25),rg
 body.theme-ocean .login{background:radial-gradient(60% 45% at 85% 0%,rgba(255,210,63,.45),rgba(255,210,63,0) 70%),linear-gradient(180deg,#0f73b8,#04274f 70%,#021a33)}
 body.theme-ocean mark{background:rgba(255,210,63,.35)}
 
+/* ---------- アカウントメニュー・検索履歴・CSV ---------- */
+.acct{position:relative;margin-left:8px;flex:none}
+.acct-btn{width:36px;height:36px;border-radius:50%;border:1px solid var(--rim-hi);background:var(--glass);display:grid;place-items:center;padding:0}
+.acct-btn svg{width:20px;height:20px;fill:none;stroke:var(--text);stroke-width:1.8}
+.acct-menu{position:absolute;right:0;top:44px;min-width:190px;z-index:40;padding:6px;border-radius:14px;border:1px solid var(--rim-hi);background:rgba(8,16,40,.97);box-shadow:0 14px 40px -10px #000}
+body.theme-ocean .acct-menu{background:rgba(3,34,70,.97)}
+.acct-menu button{display:flex;align-items:center;gap:10px;width:100%;padding:11px 12px;border:0;border-radius:10px;background:none;color:var(--text);font-size:14px;text-align:left}
+.acct-menu button:hover,.acct-menu button:focus-visible{background:var(--glass-hi)}
+.acct-menu svg{width:18px;height:18px;fill:none;stroke:var(--mod);stroke-width:1.8;flex:none}
+.chips.recent{margin-top:10px;align-items:center}
+.chips.recent .rlabel{font-family:var(--f-tech);font-size:11px;letter-spacing:.14em;color:var(--dim);margin-right:2px}
+.chip.rc{display:inline-flex;align-items:center;gap:6px;max-width:16em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chip.rc i{width:7px;height:7px;border-radius:50%;background:var(--c);box-shadow:0 0 6px var(--c);flex:none}
+.hist{display:flex;flex-direction:column;gap:6px;margin-top:12px}
+.hrow{display:flex;gap:6px;align-items:stretch}
+.hgo{flex:1;min-width:0;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 12px;border-radius:12px;border:1px solid var(--rim);background:var(--glass);text-align:left}
+.hm{font-size:11px;font-weight:700;color:var(--c);border:1px solid var(--c);border-radius:999px;padding:1px 8px;white-space:nowrap}
+.hq{font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ht{font-family:var(--f-tech);font-size:11px;color:var(--faint);white-space:nowrap}
+.hdel{width:40px;border-radius:12px;border:1px solid var(--rim);background:var(--glass);color:var(--dim);font-size:14px}
+.hdel:hover{color:var(--up);border-color:var(--up)}
+.confirm-del{margin-top:14px;padding:12px;border-radius:12px;border:1px solid var(--up);background:color-mix(in srgb,var(--up) 10%,transparent)}
+.confirm-del p{margin:0 0 8px;font-size:13.5px}
+.dlbtn{display:inline-flex;align-items:center;gap:4px;margin-left:6px;padding:2px 9px;border-radius:999px;border:1px solid var(--rim-hi);background:var(--glass);color:var(--mod);font-family:var(--f-tech);font-size:11px;font-weight:700;letter-spacing:.06em;vertical-align:middle}
+.dlbtn svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2.2}
+.meta span:last-child{display:inline-flex;align-items:center;flex-wrap:wrap;gap:4px}
+
 /* ---------- top bar ---------- */
 .bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;padding-block:12px 10px;display:flex;align-items:center;gap:10px;
   background:linear-gradient(to bottom,rgba(3,5,12,.92) 60%,rgba(3,5,12,0));backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
@@ -85,7 +112,7 @@ body.theme-ocean mark{background:rgba(255,210,63,.35)}
 .logo small{display:block;font-family:var(--f-tech);font-size:10px;letter-spacing:.32em;color:var(--dim)}
 .bar .sp{flex:1}
 .chip-live{font-family:var(--f-tech);font-size:10.5px;letter-spacing:.12em;color:var(--core);border:1px solid rgba(125,255,207,.35);border-radius:999px;padding:3px 9px;white-space:nowrap;display:flex;align-items:center;gap:6px}
-@media (max-width:420px){.chip-live:not(.out){display:none}.chip-live.out{padding:3px 7px;font-size:10px}.logo small{letter-spacing:.18em}}
+@media (max-width:420px){.chip-live:not(.out){display:none}.chip-live.out{padding:3px 7px;font-size:10px}.logo b{font-size:15px}.logo small{display:none}.logo small{letter-spacing:.18em}}
 .chip-live i{width:6px;height:6px;border-radius:50%;background:var(--core);box-shadow:0 0 8px var(--core)}
 
 /* ---------- glass primitives ---------- */
@@ -377,6 +404,7 @@ h3.gh{font-size:14px;font-weight:900;margin:18px 0 8px}
 <script src="vault.js"></script>
 <script src="emph.js"></script>
 <script src="app.js"></script>
+<script src="tools.js"></script>
 
 
 <script src="boot.js"></script>

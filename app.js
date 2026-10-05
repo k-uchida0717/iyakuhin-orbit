@@ -250,7 +250,7 @@ function render(){
 /* 検索欄は再描画で消えないよう、モジュールごとに1回だけ作って使い回す */
 function searchBox(id,ph,val,onInput){
   return{html:`<div class="search"><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg><input id="${id}" type="search" inputmode="search" autocomplete="off" enterkeyhint="search" placeholder="${esc(ph)}" value="${esc(val)}" aria-label="${esc(ph)}"></div>`,
-    bind(){let t;const el=$("#"+id);el.addEventListener("input",e=>{clearTimeout(t);t=setTimeout(()=>onInput(e.target.value),140)})}};
+    bind(){let t;const el=$("#"+id);el.addEventListener("input",e=>{clearTimeout(t);t=setTimeout(()=>onInput(e.target.value),140);if(typeof HIST!=="undefined")HIST.note(id,e.target.value)})}};
 }
 
 /* ===================================================================== ホーム */
@@ -265,6 +265,7 @@ function renderHome(){
       <h2 class="h">${esc(APP.headline)}</h2>
       <p class="lead">${esc(APP.lead)}ひらがな・カタカナ・英字・ローマ字のどれで入力しても探せます。</p>
       ${box.html}
+      <div class="chips recent" id="hrecent"${st.q?" hidden":""}>${typeof HIST!=="undefined"?HIST.chips():""}</div>
     </section>
     <div id="hres"></div>
     <div id="homeviz">
@@ -305,6 +306,7 @@ function satHtml(k,label){
 }
 function homeResults(){
   const box=$("#hres"),viz=$("#homeviz");const q=S.home.q.trim();
+  const rc=$("#hrecent");if(rc){rc.hidden=!!q;if(!q)rc.innerHTML=HIST.chips()}
   if(!q){box.innerHTML="";viz.hidden=false;return}
   viz.hidden=true;const terms=queryTerms(q);
   const secs=[];
@@ -420,7 +422,9 @@ function yakkaBody(){
   }
   const rows=searchYakka(terms,st);
   if(st.cls&&!terms.length)rows.sort((a,b)=>a.i.localeCompare(b.i,"ja")||a.p[st.rev]-b.p[st.rev]);
-  b.innerHTML=`${filt}<div class="meta"><span>${rows.length.toLocaleString()} 件${st.cmb?(terms.length?"（入力した薬と併用禁忌の品目）":"（併用禁忌の記載がある品目）"):""}</span><span>${esc(d.revs[st.rev].label)}の薬価／前回比</span></div>
+  DL.yakka=()=>({name:`薬価_${st.q||"一覧"}`,header:["区分","YJコード","品名","成分名","規格","メーカー","先発・後発","局・麻・毒等",d.revs[st.rev].label+"の薬価","前回の薬価","増減率(%)","薬効分類","効能・効果"+(D.eff?"（この規格）":""),"併用禁忌","経過措置"],
+    rows:rows.map(r=>{const p=r.p[st.rev],q=prevOf(r.p,st.rev);return[KUBUN[r.k],r.c,r.n,r.i,r.s,r.m,r.f.startsWith("S")?"先発":r.f.startsWith("G")?"後発":"",r.x,p,q,p!=null&&q?(pct(q,p)).toFixed(1):"",r.cl+" "+clsName(r.c),r.ef>=0?nk(r.own||D.eff.t[r.ef]).replace(/\s*\n\s*/g," / "):"",r.cb>=0?"あり":"",r.e||""]})});
+  b.innerHTML=`${filt}<div class="meta"><span>${rows.length.toLocaleString()} 件${st.cmb?(terms.length?"（入力した薬と併用禁忌の品目）":"（併用禁忌の記載がある品目）"):""}</span><span>${esc(d.revs[st.rev].label)}の薬価／前回比 ${rows.length?dlBtn("yakka"):""}</span></div>
     ${rows.length?`<div class="list">${rows.slice(0,st.limit).map(r=>yakkaCard(r,st.rev,terms)).join("")}</div>`:`<div class="empty">該当する品目がありません。成分名や別の表記でお試しください。</div>`}
     ${rows.length>st.limit?`<button class="more" id="ymore">さらに表示（残り ${(rows.length-st.limit).toLocaleString()} 件）</button>`:""}`;
   const m=$("#ymore");if(m)m.onclick=()=>{st.limit+=100;yakkaBody()};
@@ -538,7 +542,8 @@ function kensaBody(){
       (keys.length>st.limit?`<button class="more" id="kmore">さらに表示</button>`:"");
     b.querySelectorAll(".part>button").forEach(x=>x.onclick=()=>{const bd=x.nextElementSibling;if(bd.hidden&&!bd.innerHTML)bd.innerHTML=`<div class="list" style="padding:8px">${g.get(x.dataset.k).map(r=>kensaCard(r,st.rev,[])).join("")}</div>`;bd.hidden=!bd.hidden});
   }else{
-    b.innerHTML=`<div class="meta"><span>${rows.length.toLocaleString()} 件</span><span>${esc(d.revs[st.rev].label)}の点数／前回比</span></div>
+    DL.kensa=()=>({name:`点数_${st.q}`,header:["区分番号","診療行為コード","名称","読み","単位",...d.revs.map(r=>r.label)],rows:rows.map(r=>[r.k,r.c,r.n,r.y,r.u,...r.p])});
+    b.innerHTML=`<div class="meta"><span>${rows.length.toLocaleString()} 件</span><span>${esc(d.revs[st.rev].label)}の点数／前回比 ${rows.length?dlBtn("kensa"):""}</span></div>
       ${rows.length?`<div class="list">${rows.slice(0,st.limit).map(r=>kensaCard(r,st.rev,terms)).join("")}</div>`:`<div class="empty">該当する項目がありません。略称（例：CRP、HbA1c）や読みでもお試しください。</div>`}
       ${rows.length>st.limit?`<button class="more" id="kmore">さらに表示（残り ${(rows.length-st.limit).toLocaleString()} 件）</button>`:""}`;
   }
@@ -631,7 +636,8 @@ function ryuuiBody(){
     return;
   }
   const secs=searchRyuui(terms,st.part);
-  b.innerHTML=`<div class="meta"><span>${secs.length.toLocaleString()} 件</span><span>見出し一致 → 本文の一致数の順</span></div>
+  DL.ryuui=()=>({name:`留意事項_${st.q}`,header:["区分番号","見出し","部","通知のページ","本文"],rows:secs.map(s=>[s.c,s.n,s.pt||s.ch,s.pg,s.t])});
+  b.innerHTML=`<div class="meta"><span>${secs.length.toLocaleString()} 件</span><span>見出し一致 → 本文の一致数の順 ${secs.length?dlBtn("ryuui"):""}</span></div>
     ${secs.length?`<div class="list">${secs.slice(0,st.limit).map(s=>ryuuiCard(s,terms)).join("")}</div>`:`<div class="empty">該当する記載がありません。</div>`}
     ${secs.length>st.limit?`<button class="more" id="rmore">さらに表示（残り ${(secs.length-st.limit).toLocaleString()} 件）</button>`:""}`;
   const m=$("#rmore");if(m)m.onclick=()=>{st.limit+=40;ryuuiBody()};

@@ -10,12 +10,13 @@
      （窓口はマスター鍵もパスワードも知らない。新しい欄はブラウザ内で作って送る） */
 "use strict";
 const VAULT=(()=>{
-  let cfg=null,key=null,app="main";
+  let cfg=null,key=null,app="main",user="local";
   const b64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
   const tob64=u=>btoa(String.fromCharCode(...new Uint8Array(u)));
   const hex=buf=>[...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,"0")).join("");
   const enc=new TextEncoder();
   const SK=()=>"orbit.vk."+app; /* 同じアドレス配下の別アプリと保存場所を分ける */
+  const UK=()=>"orbit.uid."+app;  /* ログイン中のID（ハッシュの先頭16文字）。検索履歴をIDごとに分けるのに使う */
   const store={get(k){try{return sessionStorage.getItem(k)||localStorage.getItem(k)}catch(e){return null}},
     set(k,v,keep){try{(keep?localStorage:sessionStorage).setItem(k,v)}catch(e){}},
     del(k){try{sessionStorage.removeItem(k);localStorage.removeItem(k)}catch(e){}}};
@@ -45,7 +46,7 @@ const VAULT=(()=>{
   }
   async function tryLogin(id,pw,keep){
     const u=await unwrap(id,pw);if(!u)return false;
-    key=u.k;store.set(SK(),tob64(u.raw),keep);return true;
+    key=u.k;user=u.h.slice(0,16);store.set(SK(),tob64(u.raw),keep);store.set(UK(),user,keep);return true;
   }
   const LOGO=`<svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="5" fill="#7dffcf"/><ellipse cx="20" cy="20" rx="17" ry="7" fill="none" stroke="#4fe3ff" stroke-width="1.4" transform="rotate(-25 20 20)"/><ellipse cx="20" cy="20" rx="17" ry="7" fill="none" stroke="#b38cff" stroke-width="1.4" transform="rotate(35 20 20)"/><circle cx="34" cy="13" r="2.6" fill="#ffc46b"/></svg>`;
   function loginScreen(title){
@@ -120,12 +121,13 @@ const VAULT=(()=>{
   return{
     get locked(){return!!cfg},
     get canChange(){return!!(cfg&&cfg.pwapi)},
+    get user(){return user},
     async init(title,appId){
       app=appId||"main";
       try{const r=await fetch("vault.json",{cache:"no-store"});cfg=r.ok?await r.json():null}catch(e){cfg=null}
       if(!cfg)return; /* 暗号化なしの配信（手元での確認用） */
       const saved=store.get(SK());
-      if(saved){try{const k=await importMaster(b64(saved));if(await check(k)){key=k;return}}catch(e){}store.del(SK())}
+      if(saved){try{const k=await importMaster(b64(saved));if(await check(k)){key=k;user=store.get(UK())||"local";return}}catch(e){}store.del(SK())}
       await loginScreen(title);
     },
     async json(name){
@@ -134,6 +136,6 @@ const VAULT=(()=>{
       return JSON.parse(await gunzip(await decrypt(key,await r.arrayBuffer())));
     },
     changePassword:passwordScreen,
-    logout(){store.del(SK());location.reload()}
+    logout(){store.del(SK());store.del(UK());location.reload()}
   };
 })();

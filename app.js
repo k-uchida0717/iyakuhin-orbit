@@ -661,6 +661,44 @@ function closeSheet(){$("#sheet-root").innerHTML="";document.body.style.overflow
 (function sky(){
   const cv=$("#sky"),cx=cv.getContext("2d");let W,H,stars=[];
   const still=matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if(typeof APP!=="undefined"&&APP.theme==="ocean")return ocean();
+  /* 医薬品アプリ：右上から夏の太陽が差す大海原。水平線から下に波の線、太陽の下に光の道（きらめき）、上空に光の粒 */
+  function ocean(){
+    let glints=[],motes=[],t0=0;
+    function size(){const dpr=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cv.width=W*dpr;cv.height=H*dpr;cx.setTransform(dpr,0,0,dpr,0,0);
+      const hy=H*.36,sx=W*.82;
+      glints=Array.from({length:Math.round(W*H/2600)},()=>{const y=hy+Math.pow(Math.random(),1.6)*(H-hy);const spread=40+(y-hy)*.9;
+        const near=Math.random()<.65;return{x:near?sx+(Math.random()-.5)*spread*2:Math.random()*W,y,r:Math.random()*1.6+.4+(y-hy)/H*1.6,t:Math.random()*6.28,s:Math.random()*.004+.002,near}});
+      motes=Array.from({length:Math.round(W/14)},()=>({x:Math.random()*W,y:Math.random()*H*.36,r:Math.random()*1.4+.3,t:Math.random()*6.28,v:Math.random()*.15+.05}))}
+    function draw(ts){
+      const dt=Math.min(50,ts-t0)||16;t0=ts;cx.clearRect(0,0,W,H);
+      const hy=H*.36,sx=W*.82,tt=ts*.001;
+      /* 水平線のかすみ */
+      const g=cx.createLinearGradient(0,hy-30,0,hy+40);g.addColorStop(0,"rgba(255,236,170,0)");g.addColorStop(.5,"rgba(255,236,170,.35)");g.addColorStop(1,"rgba(255,236,170,0)");
+      cx.fillStyle=g;cx.fillRect(0,hy-30,W,70);
+      /* 波：奥ほど細かく、手前ほど大きく */
+      for(let i=0;i<26;i++){
+        const k=i/25,y=hy+Math.pow(k,1.7)*(H-hy),amp=1+k*9,len=60+k*260,ph=tt*(.6+k*.8)+i*1.7;
+        cx.beginPath();for(let x=-20;x<=W+20;x+=12){const yy=y+Math.sin(x/len*6.283+ph)*amp;x<0?cx.moveTo(x,yy):cx.lineTo(x,yy)}
+        cx.strokeStyle=`rgba(190,230,255,${.05+k*.08})`;cx.lineWidth=.6+k*1.2;cx.stroke();
+      }
+      /* 太陽の下の光の道（きらめき） */
+      for(const p of glints){
+        /* 点滅はゆっくり（数秒周期）・やわらかく：チカチカしないように */
+        if(!still)p.t+=dt*p.s*.3;
+        const w=Math.sin(p.t),a=w*w*(p.near?.6:.22);if(a<.04)continue;
+        const yy=p.y+Math.sin(tt*1.2+p.x*.02)*2;
+        cx.beginPath();cx.ellipse(p.x,yy,p.r*2.4,p.r*.7,0,0,6.283);cx.fillStyle=`rgba(255,${p.near?236:250},${p.near?150:255},${a})`;cx.fill();
+      }
+      /* 上空の光の粒 */
+      for(const m of motes){
+        if(!still){m.y-=m.v*dt*.02;m.t+=dt*.002;if(m.y<-4){m.y=H*.36;m.x=Math.random()*W}}
+        cx.beginPath();cx.arc(m.x+Math.sin(m.t)*4,m.y,m.r,0,6.283);cx.fillStyle=`rgba(255,240,180,${.25+.35*Math.abs(Math.sin(m.t))})`;cx.fill();
+      }
+      if(!still)requestAnimationFrame(draw);
+    }
+    size();addEventListener("resize",()=>{size();if(still)draw(0)});requestAnimationFrame(draw);
+  }
   function size(){const dpr=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cv.width=W*dpr;cv.height=H*dpr;cx.setTransform(dpr,0,0,dpr,0,0);
     stars=Array.from({length:Math.round(W*H/2600)},()=>({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.3+.2,z:Math.random()*.8+.2,t:Math.random()*6.28,h:Math.random()<.12?(Math.random()<.5?"79,227,255":"179,140,255"):"230,238,255"}))}
   let last=0;

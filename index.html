@@ -50,6 +50,32 @@ button{cursor:pointer}
 :focus-visible{outline:2px solid var(--mod);outline-offset:2px}
 a{color:var(--mod)}
 
+/* ---------- テーマ：大海原と夏の日差し（医薬品アプリ） ---------- */
+body.theme-ocean{
+  --void:#021a33; --deep:#06325e;
+  --glass:rgba(3,38,78,.58); --glass-hi:rgba(8,62,118,.66); --rim:rgba(255,222,120,.26); --rim-hi:rgba(255,222,120,.55);
+  --text:#f6fbff; --dim:#bcd6ee; --faint:#86aed0;
+  --yakka:#ffd23f; --core:#5fe3ff; --kensa:#7fd8ff; --ryuui:#ffe28a;
+  --up:#ff8a7a; --down:#7fd0ff; --warn:#ffd86b;
+  background:#021a33}
+body.theme-ocean[data-mod="yakka"],body.theme-ocean:not([data-mod]),body.theme-ocean[data-mod=""]{--mod:#ffd23f}
+body.theme-ocean .backdrop{background:
+  radial-gradient(60% 42% at 86% -6%,#fff3b0 0%,#ffd23f 22%,rgba(255,196,40,.55) 42%,rgba(255,196,40,0) 70%),
+  radial-gradient(90% 30% at 80% 36%,rgba(255,226,140,.28),rgba(255,226,140,0) 70%),
+  linear-gradient(180deg,#1592d6 0%,#0f73b8 22%,#0b5596 36%,#073c74 52%,#04274f 74%,#021a33 100%)}
+body.theme-ocean .nebula{background:conic-gradient(from 200deg at 86% -6%,rgba(255,236,160,0) 0deg,rgba(255,236,160,.12) 8deg,rgba(255,236,160,0) 16deg,rgba(255,236,160,.08) 26deg,rgba(255,236,160,0) 34deg,rgba(255,236,160,.1) 46deg,rgba(255,236,160,0) 58deg);inset:0}
+body.theme-ocean .horizon{display:none}
+body.theme-ocean .bar{background:linear-gradient(to bottom,rgba(2,30,62,.9) 60%,rgba(2,30,62,0))}
+body.theme-ocean h2.h,body.theme-ocean .lead{text-shadow:0 2px 14px rgba(0,20,50,.55)}
+body.theme-ocean .search input{background:rgba(2,30,62,.78)}
+body.theme-ocean nav.dock .in{background:rgba(2,30,62,.86)}
+body.theme-ocean .sheet{background:linear-gradient(to bottom,rgba(6,52,100,.98),rgba(2,22,46,.99));box-shadow:0 -20px 60px -20px #ffd23f}
+body.theme-ocean .sheet .top{background:#063464}
+body.theme-ocean .node .globe{background:radial-gradient(circle at 40% 35%,#fffbe0 0%,#ffe066 25%,#ffb703 60%,#c76b00 100%);box-shadow:0 0 60px 6px rgba(255,210,63,.7),0 0 0 1px rgba(255,240,180,.8) inset}
+body.theme-ocean .core{background:radial-gradient(circle,rgba(95,227,255,.25),rgba(95,227,255,0) 70%)}
+body.theme-ocean .login{background:radial-gradient(60% 45% at 85% 0%,rgba(255,210,63,.45),rgba(255,210,63,0) 70%),linear-gradient(180deg,#0f73b8,#04274f 70%,#021a33)}
+body.theme-ocean mark{background:rgba(255,210,63,.35)}
+
 /* ---------- top bar ---------- */
 .bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;padding-block:12px 10px;display:flex;align-items:center;gap:10px;
   background:linear-gradient(to bottom,rgba(3,5,12,.92) 60%,rgba(3,5,12,0));backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}

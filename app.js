@@ -159,7 +159,9 @@ function prepYakka(d){
       if(k){const v=eff.y[k];r.ef=v[0];r.ct=v[1];r.cb=v[2]??-1;r.efx=x;r.efr=eff.r&&eff.r[k];
         /* 規格（量）によって適応が違う文書：その規格に当てはまる行だけで「この規格の適応」を作る */
         if(v.length>3&&v[3]>=0){r.doc=v[3];r.bi=x==="exact"?v[4]:-1;
-          if(r.bi>=0){r.own=ownLines(eff.d[r.doc],r.bi).join("\n");r.ownN=norm(r.own)}}}}
+          if(r.bi>=0){r.own=ownLines(eff.d[r.doc],r.bi).join("\n");r.ownN=norm(r.own)}}
+        /* u: 用法・用量 [本文の番号(, 規格別文書, その規格の番号)] */
+        const u=eff.u&&eff.u[k];if(u){r.ud=u[0];if(u.length>1&&u[1]>=0){r.udoc=u[1];r.ubi=x==="exact"?u[2]:-1}}}}
   });
 }
 /* ---------- 規格別の適応 ---------- */
@@ -200,6 +202,18 @@ function strengthBlock(r,terms){
       ${rows.map(([t,set])=>`<tr><td class="w">${markText(t,terms)}</td>${names.map((_,i)=>`<td class="c${i===bi?" me":""}">${set.has(i)?'<span class="yes">●</span>':'<span class="no">－</span>'}</td>`).join("")}</tr>`).join("")}
     </table></div>
     <details class="raw"><summary>添付文書の記載どおりに見る</summary><div class="txt">${markText(D.eff.t[r.ef],terms)}</div></details>`;
+}
+/* 用法・用量：規格で量が違う文書は、この規格に当てはまる行だけを出し、原文は折りたたむ */
+function doseBlock(r,terms){
+  const raw=emph(markText(D.eff.t[r.ud],terms));
+  if(r.udoc==null)return`<div class="txt">${raw}</div>`;
+  const doc=D.eff.d[r.udoc],names=shortNames(doc.b),bi=r.ubi;
+  if(bi<0)return`<div class="warnbox">規格（含量・剤形）によって用法・用量が異なる薬です。この品目がどの規格かを特定できないため、【 】の規格名の見出しで確認してください。</div><div class="txt">${raw}</div>`;
+  const own=doc.l.filter(([s,set,h])=>!h&&applies(set,bi)).map(l=>markText(l[0],terms));
+  return`<div class="warnbox">規格（含量・剤形）によって用法・用量が異なる薬です。下はこの品目（${esc(names[bi])}）に当てはまる記載です。</div>
+    <div class="subh">この規格の用法・用量 <span class="pill on">${esc(names[bi])}</span></div>
+    <div class="txt">${emph(own.join("\n"))||"（該当なし）"}</div>
+    <details class="raw"><summary>添付文書の記載どおりに見る（全規格）</summary><div class="txt">${raw}</div></details>`;
 }
 function prepKensa(d){
   const rows=d.rows.map((a,id)=>({id,c:a[0],k:a[1],h:a[2],n:nk(a[3]),u:a[4],p:a[5],y:nk(a[6]||""),
@@ -479,9 +493,10 @@ function openYakka(id){
     <div class="big"><span class="v">${fmt(r.p[st.rev])}</span><span class="u">円／${esc(r.s)}　${esc(d.revs[st.rev].label)}</span>${delta(prevOf(r.p,st.rev),r.p[st.rev])}</div>`,
   `<div class="blk"><h3>INDICATIONS ／ 効能・効果</h3>${r.ef>=0&&r.doc>=0?strengthBlock(r,terms):r.ef>=0?`<div class="txt">${emph(markText(D.eff.t[r.ef],terms))}</div>`
       :`<div class="txt" style="color:var(--dim)">${D.eff?"この品目の添付文書データが見つかりませんでした。":"効能・効果データは未登録です。"}下のリンクから確認できます。</div>`}</div>
+  ${r.ud!=null?`<div class="blk"><h3>DOSAGE ／ 用法・用量</h3>${doseBlock(r,terms)}</div>`:""}
   ${r.ct>=0?`<div class="blk" style="--mod:var(--up)"><h3>CONTRAINDICATIONS ／ 禁忌</h3><div class="txt">${emph(markText(D.eff.t[r.ct],terms))}</div></div>`:""}
   ${r.ef>=0?`<div class="blk" style="--mod:var(--up)"><h3>CONTRAINDICATED COMBINATIONS ／ 併用禁忌</h3>${r.cb>=0?comboTable(r.cb,terms):`<div class="txt" style="color:var(--dim)">添付文書に併用禁忌の記載はありません。</div>`}</div>`:""}
-  ${r.ef>=0?`<p class="note">出典：PMDA 医療用医薬品 添付文書を加工して作成（${esc(D.eff.built)}取得${r.efr?`・${esc(r.efr)}改訂版`:""}）${r.efx==="near"?"。この品目の添付文書が見つからないため、同じ成分・剤形の添付文書の記載を表示しています。":""}用法・用量や併用注意などは添付文書の原文でご確認ください。</p>`:""}
+  ${r.ef>=0?`<p class="note">出典：PMDA 医療用医薬品 添付文書を加工して作成（${esc(D.eff.built)}取得${r.efr?`・${esc(r.efr)}改訂版`:""}）${r.efx==="near"?"。この品目の添付文書が見つからないため、同じ成分・剤形の添付文書の記載を表示しています。":""}併用注意や特定の背景を有する患者への注意などは添付文書の原文でご確認ください。</p>`:""}
   <div class="blk"><h3>PRICE TIMELINE ／ 直近3回の改定</h3>${timeline(d.revs,r.p,st.rev,"円")}</div>
   <div class="blk"><h3>PROFILE</h3><dl class="kv">
     <dt>薬効分類</dt><dd><b>${esc(r.cl)} ${esc(clsName(r.c))}</b><br><span class="note">${esc(CLS2[+r.c.slice(0,2)]||"")}／${esc(CLS1[+r.c[0]]||"")}</span></dd>

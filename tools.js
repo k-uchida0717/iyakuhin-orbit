@@ -81,6 +81,7 @@ function accountMenu(){
   const wrap=document.createElement("div");wrap.className="acct";
   wrap.innerHTML=`<button class="acct-btn" aria-haspopup="true" aria-expanded="false" aria-label="メニュー"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.6"/><path d="M4.5 20c1.4-3.8 4.2-5.6 7.5-5.6s6.1 1.8 7.5 5.6"/></svg></button>
     <div class="acct-menu" hidden>
+      ${typeof MANUAL!=="undefined"?`<button data-a="help"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14M12 17.5v.01"/></svg>使い方</button>`:""}
       <button data-a="hist"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v4h4M12 7v5l3 2"/></svg>検索履歴</button>
       ${VAULT.canChange?`<button data-a="pw"><svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>パスワード変更</button>`:""}
       ${VAULT.locked?`<button data-a="out"><svg viewBox="0 0 24 24"><path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10"/></svg>ログアウト</button>`:""}
@@ -91,5 +92,6 @@ function accountMenu(){
   btn.onclick=e=>{e.stopPropagation();menu.hidden=!menu.hidden;btn.setAttribute("aria-expanded",String(!menu.hidden))};
   document.addEventListener("click",e=>{if(!wrap.contains(e.target))close()});
   menu.onclick=e=>{const a=e.target.closest("[data-a]");if(!a)return;close();
+    if(a.dataset.a==="help")MANUAL.open();
     if(a.dataset.a==="hist")HIST.open();if(a.dataset.a==="pw")VAULT.changePassword();if(a.dataset.a==="out")VAULT.logout()};
 }

@@ -278,7 +278,7 @@ function renderHome(){
   v.innerHTML=`<section class="hero">
       <div class="eyebrow" style="--mod:var(--core)">${esc(APP.eyebrow)}</div>
       <h2 class="h">${esc(APP.headline)}</h2>
-      <p class="lead">${esc(APP.lead)}ひらがな・カタカナ・英字・ローマ字のどれで入力しても探せます。</p>
+      <p class="lead">${esc(APP.lead)}ひらがな・カタカナ・英字・ローマ字のどれで入力しても探せます。${typeof MANUAL!=="undefined"?`<button class="login-help" id="hhelp" type="button" style="display:inline;width:auto;margin:0 0 0 6px">使い方を見る</button>`:""}</p>
       ${box.html}
       <div class="chips recent" id="hrecent"${st.q?" hidden":""}>${typeof HIST!=="undefined"?HIST.chips():""}</div>
     </section>
@@ -304,6 +304,7 @@ function renderHome(){
       <p class="note" style="margin-top:6px">個人が作成した非公式の検索ツールです。${esc(APP.notOfficial)}が作成したものではありません。内容の正確性は保証できないため、診療・請求の判断は必ず告示・通知などの原本で確認してください。営利目的では利用しないでください。</p>
     </div>`;
   box.bind();
+  const hh=$("#hhelp");if(hh)hh.onclick=()=>MANUAL.open();
   v.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));
   if(st.q)homeResults();
 }

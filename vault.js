@@ -61,8 +61,10 @@ const VAULT=(()=>{
         <label class="keep"><input id="lkeep" type="checkbox" checked> この端末でログインしたままにする</label>
         <p class="err" id="lerr" hidden>IDまたはパスワードが違います。</p>
         <button class="btn pri" id="lbtn" type="submit">ログイン</button>
+        ${typeof MANUAL!=="undefined"?`<button class="login-help" id="lhelp" type="button">使い方・ログイン方法</button>`:""}
       </form>`;
       document.body.appendChild(el);
+      const lh=el.querySelector("#lhelp");if(lh)lh.onclick=()=>MANUAL.open("login");
       el.querySelector("#lf").addEventListener("submit",async e=>{
         e.preventDefault();const btn=el.querySelector("#lbtn");btn.disabled=true;btn.textContent="確認中…";
         const ok=await tryLogin(el.querySelector("#lid").value,el.querySelector("#lpw").value,el.querySelector("#lkeep").checked);

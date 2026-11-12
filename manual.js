@@ -3,7 +3,7 @@
 "use strict";
 const MANUAL=(()=>{
   const drug=()=>APP.id==="drug";
-  const url=()=>location.origin+location.pathname.replace(/index\.html$/,"");
+  const url=()=>APP.home||location.origin+location.pathname.replace(/index\.html$/,""); /* APP.home はPDF化（make_manual_pdf.py）で使う */
   /* 章：[キー, 見出し, 本文HTML] */
   function chapters(){
     const common=[
@@ -109,5 +109,5 @@ const MANUAL=(()=>{
     if(start){const s=el.querySelector("#man-"+start);if(s)setTimeout(()=>s.scrollIntoView({block:"start"}),0)}
     el.querySelector("#mx").focus({preventScroll:true});
   }
-  return{open};
+  return{open,chapters};
 })();

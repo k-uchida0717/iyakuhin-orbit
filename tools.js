@@ -77,8 +77,9 @@ document.addEventListener("click",e=>{
 
 /* このアプリのアドレスを LINE で送る（ID・パスワードは含めない。パスワードは別の手段で伝える）。
    URL を貼ると、公開ページの OGP（タイトル・説明・画像）がカードで表示される */
+const OGP_VER="2"; /* LINE はURLごとにプレビューを長く保存するため、カードを変えたらここを上げて別URL（?v=）として読み直させる */
 function shareLine(){
-  const url=location.origin+location.pathname.replace(/index\.html$/,"");
+  const url=location.origin+location.pathname.replace(/index\.html$/,"")+"?v="+OGP_VER;
   const text=`${APP.title}\n${url}\n（IDとパスワードは別にお知らせします）`;
   window.open("https://line.me/R/msg/text/?"+encodeURIComponent(text),"_blank","noopener");
 }
